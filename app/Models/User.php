@@ -12,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable,HasApiTokens;
+    use HasApiTokens, HasFactory,Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,7 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'balance'
+        'balance',
     ];
 
     /**
@@ -49,15 +49,13 @@ class User extends Authenticatable
         ];
     }
 
-
     public function sentTransactions(): HasMany
     {
-        return $this->hasMany(related: Transactions::class,foreignKey: 'sender_id');
+        return $this->hasMany(related: Transactions::class, foreignKey: 'sender_id');
     }
 
     public function receivedTransactions(): HasMany
     {
-        return $this->hasMany(related: Transactions::class,foreignKey: 'receiver_id');
+        return $this->hasMany(related: Transactions::class, foreignKey: 'receiver_id');
     }
-
 }

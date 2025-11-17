@@ -15,7 +15,7 @@ class Transactions extends Model
         'sender_id',
         'receiver_id',
         'commission_fees',
-        'amount'
+        'amount',
     ];
 
     protected $casts = [
@@ -25,13 +25,11 @@ class Transactions extends Model
 
     public function sender(): BelongsTo
     {
-       return $this->belongsTo(related: User::class,foreignKey: 'id',ownerKey: 'sender_id');
+        return $this->belongsTo(related: User::class, foreignKey: 'id', ownerKey: 'sender_id');
     }
 
     public function receiver(): BelongsTo
     {
-        return $this->belongsTo(related: User::class,foreignKey: 'id',ownerKey: 'receiver_id');
+        return $this->belongsTo(related: User::class, foreignKey: 'id', ownerKey: 'receiver_id');
     }
-
-
 }
