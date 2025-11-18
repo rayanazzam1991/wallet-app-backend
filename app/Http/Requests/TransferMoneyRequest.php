@@ -24,7 +24,7 @@ class TransferMoneyRequest extends FormRequest
     {
         return [
             'receiver_id' => ['required', 'exists:users,id'],
-            'amount' => ['required', 'numeric','gt:0',new CheckSenderBalance],
+            'amount' => ['required', 'numeric', 'gt:0', new CheckSenderBalance],
         ];
     }
 }

@@ -18,7 +18,7 @@ class CheckSenderBalance implements ValidationRule
     {
         /** @var User $sender */
         $sender = Auth::user();
-        if($value > $sender->balance){
+        if ($value > $sender->balance) {
             $fail('The :attribute should be less than the existed user balance');
         }
     }
