@@ -5,7 +5,6 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
 it('should prevent sending money form non-authenticated user', function () {
