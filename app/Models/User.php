@@ -58,4 +58,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(related: Transactions::class, foreignKey: 'receiver_id');
     }
+
+    public function allTransactions()
+    {
+        return Transactions::query()->where('sender_id', $this->id)
+            ->orWhere('receiver_id', $this->id);
+    }
 }

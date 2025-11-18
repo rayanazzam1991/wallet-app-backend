@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,10 @@ class TransactionsFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'sender_id' => User::factory()->create()->id,
+            'receiver_id' => User::factory()->create()->id,
+            'amount' => fake()->randomFloat(),
+            'created_at' => now(),
         ];
     }
 }

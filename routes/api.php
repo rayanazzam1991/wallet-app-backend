@@ -14,7 +14,6 @@ Route::group(['prefix' => 'transactions', 'middleware' => 'auth:sanctum'], funct
     Route::post('/', [TransactionsController::class, 'create']);
 });
 
-
 Route::middleware(['throttle:api'])->prefix('auth/')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
 });

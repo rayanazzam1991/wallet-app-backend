@@ -6,7 +6,6 @@ use App\Helpers\ApiResponse;
 use App\Http\Requests\LoginUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -18,7 +17,7 @@ class AuthController extends Controller
     public function login(LoginUserRequest $request): JsonResponse
     {
 
-        $user = User::query()->where('email',$request->email)->firstOrFail();
+        $user = User::query()->where('email', $request->email)->firstOrFail();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
@@ -33,5 +32,4 @@ class AuthController extends Controller
         return ApiResponse::sendResponse(data: $user);
 
     }
-
 }

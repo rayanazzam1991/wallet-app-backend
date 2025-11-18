@@ -88,5 +88,25 @@ it('should debit the sender and credit the receiver when we make a money transfe
         'balance' => $receiverCurrentBalance + $transferredAmount,
     ]);
 });
-it('should get list of transactions for a sender', function () {});
-it('should get list of transactions for a receiver', function () {});
+it('should get list of transactions', function () {
+
+    $sender = User::factory()->create();
+
+    Transactions::factory(10)->create([
+        'sender_id' => $sender->id,
+    ]);
+
+    $response = actingAs($sender)->getJson('/api/transactions');
+
+    $response->assertJsonStructure([
+        'data' => [
+            [
+                'id',
+                'sender',
+                'receiver',
+                'amount',
+                'created_at',
+            ],
+        ],
+    ]);
+});

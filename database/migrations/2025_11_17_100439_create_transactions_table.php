@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            // Foreign keys for sender and receiver (users)
+
             $table->foreignId('sender_id')
                 ->constrained('users')
                 ->onDelete('cascade');

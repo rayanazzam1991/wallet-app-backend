@@ -25,11 +25,11 @@ class Transactions extends Model
 
     public function sender(): BelongsTo
     {
-        return $this->belongsTo(related: User::class, foreignKey: 'id', ownerKey: 'sender_id');
+        return $this->belongsTo(related: User::class, foreignKey: 'sender_id', ownerKey: 'id');
     }
 
     public function receiver(): BelongsTo
     {
-        return $this->belongsTo(related: User::class, foreignKey: 'id', ownerKey: 'receiver_id');
+        return $this->belongsTo(related: User::class, foreignKey: 'receiver_id', ownerKey: 'id');
     }
 }
