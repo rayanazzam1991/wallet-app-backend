@@ -19,28 +19,34 @@ class TransactionsController extends Controller
 
         DB::transaction(function () use ($request) {
 
-            /** @var User $sender */
-            $sender = Auth::user();
-            $receiver = User::query()->where('id', $request->receiver_id)->first();
+            $senderId = Auth::id();
+            $receiverId =  $request->receiver_id;
 
+            // total amount with fees
             $amount = $request->amount;
 
             // TODO refactor this to separated function
             $commissionFeesRatioPercentage = 1.5;
-            $amountWithFees = (100 * $amount) / (100 + $commissionFeesRatioPercentage);
-            $commissionFeesAmount = $amount - $amountWithFees;
+            $amountWithOutFees = (100 * $amount) / (100 + $commissionFeesRatioPercentage);
+            $commissionFeesAmount = $amount - $amountWithOutFees;
 
             Transactions::query()->create([
-                'sender_id' => $sender->id,
-                'receiver_id' => $request->receiver_id,
+                'sender_id' => $senderId,
+                'receiver_id' => $receiverId,
                 'amount' => $amount,
                 'commission_fees' => $commissionFeesAmount,
             ]);
 
-            $sender->decrement('balance',$amount);
-            $receiver->increment('balance',$amount - $commissionFeesAmount);
+            // doing those operation in one query will prevent the race condition and deadlock inside the transaction
+            DB::table('users')
+                ->where('id', $senderId)
+                ->update(['balance' => DB::raw("balance - {$amount}")]);
 
-        });
+            DB::table('users')
+                ->where('id', $receiverId)
+                ->update(['balance' => DB::raw("balance + {$amountWithOutFees}")]);
+
+        },3);
 
         return response()->json([
             'message' => 'Transfer created Successfully!',
