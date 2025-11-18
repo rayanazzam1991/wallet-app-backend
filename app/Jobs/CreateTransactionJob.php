@@ -2,10 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Events\TransferMoneySuccess;
 use App\Models\Transactions;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CreateTransactionJob implements ShouldQueue
 {
@@ -44,7 +46,7 @@ class CreateTransactionJob implements ShouldQueue
             $amountWithOutFees = (100 * $amount) / (100 + $commissionFeesRatioPercentage);
             $commissionFeesAmount = $amount - $amountWithOutFees;
 
-            Transactions::query()->create([
+            $transaction = Transactions::query()->create([
                 'sender_id' => $senderId,
                 'receiver_id' => $receiverId,
                 'amount' => $amount,
@@ -60,6 +62,9 @@ class CreateTransactionJob implements ShouldQueue
                 ->where('id', $receiverId)
                 ->update(['balance' => DB::raw("balance + {$amountWithOutFees}")]);
 
+
+            // broadcast the transfer creating event to users
+            event(new TransferMoneySuccess($transaction));
         }, 3);
 
     }
