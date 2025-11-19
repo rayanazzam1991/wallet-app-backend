@@ -7,62 +7,87 @@ use App\Models\Transactions;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class CreateTransactionJob implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 5;  // retry on deadlock
-
+    public int $tries = 5;        // retry on deadlock
+    public int $backoff = 2;      // small backoff for retries
     public int $timeout = 30;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public int $sender_id,
         public int $receiver_id,
-        public float $amount,
-    ) {
-        //
-    }
+        public float $amount
+    ) {}
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         DB::transaction(function () {
-            $senderId = $this->sender_id;
+
+            $senderId   = $this->sender_id;
             $receiverId = $this->receiver_id;
+            $amount     = $this->amount;
 
-            // total amount with fees
-            $amount = $this->amount;
+            $commissionRate = 1.5;
+            $amountWithoutFees = (100 * $amount) / (100 + $commissionRate);
+            $commissionFees = $amount - $amountWithoutFees;
 
-            // TODO refactor this to separated function
-            $commissionFeesRatioPercentage = 1.5;
-            $amountWithOutFees = (100 * $amount) / (100 + $commissionFeesRatioPercentage);
-            $commissionFeesAmount = $amount - $amountWithOutFees;
+            /**
+             * STEP 1: Lock users in deterministic order (prevents DEADLOCKS)
+             */
+            $ids = [$senderId, $receiverId];
+            sort($ids);
 
-            $transaction = Transactions::query()->create([
-                'sender_id' => $senderId,
-                'receiver_id' => $receiverId,
-                'amount' => $amount,
-                'commission_fees' => $commissionFeesAmount,
-            ]);
+            $users = DB::table('users')
+                ->whereIn('id', $ids)
+                ->lockForUpdate() // SELECT ... FOR UPDATE
+                ->get()
+                ->keyBy('id');
 
-            // doing those operation in one query will prevent the race condition and deadlock inside the transaction
+            $sender   = $users[$senderId];
+            $receiver = $users[$receiverId];
+
+            /**
+             * STEP 2: Check sender has enough balance
+             */
+            if ($sender->balance < $amount) {
+                throw new RuntimeException("Insufficient balance.");
+            }
+
+            /**
+             * STEP 3: Debit & Credit atomically
+             * Using DB::raw to avoid race conditions.
+             */
             DB::table('users')
                 ->where('id', $senderId)
-                ->update(['balance' => DB::raw("balance - {$amount}")]);
+                ->update([
+                    'balance' => DB::raw("balance - {$amount}")
+                ]);
 
             DB::table('users')
                 ->where('id', $receiverId)
-                ->update(['balance' => DB::raw("balance + {$amountWithOutFees}")]);
+                ->update([
+                    'balance' => DB::raw("balance + {$amountWithoutFees}")
+                ]);
 
-            // broadcast the transfer creating event to users
+            /**
+             * STEP 4: Create transaction record
+             */
+            $transaction = Transactions::query()->create([
+                'sender_id'       => $senderId,
+                'receiver_id'     => $receiverId,
+                'amount'          => $amount,
+                'commission_fees' => $commissionFees,
+            ]);
+
+            /**
+             * STEP 5: Fire event
+             */
             event(new TransferMoneySuccess($transaction));
-        }, 3);
 
+        }, 5); // DB transaction retry count on deadlocks
     }
 }
