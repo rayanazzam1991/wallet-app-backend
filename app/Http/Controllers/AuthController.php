@@ -2,44 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\GetAuthenticatedUserAction;
+use App\Actions\LoginUserAction;
 use App\Helpers\ApiResponse;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Resources\UserDetailsResource;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * @throws ValidationException
-     */
-    public function login(LoginUserRequest $request): JsonResponse
+    public function login(
+        LoginUserRequest $request,
+        LoginUserAction $action
+    ): JsonResponse
     {
+        $result = $action->execute(
+            email: $request->validated('email'),
+            password: $request->validated('password')
+        );
 
-        $user = User::query()->where('email', $request->email)->firstOrFail();
+        // Attach token info to the user resource
+        $result['user']->token = $result['token'];
+        $result['user']->token_type = $result['token_type'];
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'credentials' => ['The provided credentials are incorrect.'],
-            ]);
-        }
-        $token = $user->createToken('token')->plainTextToken;
-
-        $user['token'] = $token;
-        $user['token_type'] = 'Bearer';
-
-        return ApiResponse::sendResponse(data: $user);
-
+        return ApiResponse::sendResponse(
+            data: $result['user']
+        );
     }
-    public function me(): JsonResponse
-    {
-        /** @var User $user */
-        $user = Auth::user();
-        \Illuminate\Log\log("user",[$user]);
-        return ApiResponse::sendResponse(data: UserDetailsResource::make($user));
 
+    public function me(
+        GetAuthenticatedUserAction $action
+    ): JsonResponse
+    {
+        $user = $action->execute();
+
+        return ApiResponse::sendResponse(
+            data: UserDetailsResource::make($user)
+        );
     }
 }
