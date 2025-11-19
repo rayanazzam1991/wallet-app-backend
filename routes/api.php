@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionsController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,11 @@ Route::group(['prefix' => 'transactions', 'middleware' => 'auth:sanctum'], funct
     Route::get('/', [TransactionsController::class, 'index']);
     Route::post('/', [TransactionsController::class, 'create']);
 });
+
+Route::group(['prefix' => 'users', 'middleware' => 'auth:sanctum'], function () {
+    Route::get('/receivers', [UserController::class, 'receivers']);
+});
+
 
 Route::middleware(['throttle:api'])->prefix('auth/')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
