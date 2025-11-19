@@ -7,6 +7,7 @@ use App\Models\Transactions;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CreateTransactionJob implements ShouldQueue
 {
@@ -33,7 +34,7 @@ class CreateTransactionJob implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-
+Log::info("here 1");
             $senderId = $this->sender_id;
             $receiverId = $this->receiver_id;
 
@@ -62,6 +63,7 @@ class CreateTransactionJob implements ShouldQueue
                 ->update(['balance' => DB::raw("balance + {$amountWithOutFees}")]);
 
             // broadcast the transfer creating event to users
+            Log::info("reach here");
             event(new TransferMoneySuccess($transaction));
         }, 3);
 

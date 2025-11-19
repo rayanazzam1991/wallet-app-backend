@@ -9,5 +9,5 @@ enum TransactionType: string
     use EnumValues;
     case ALL = 'all';
     case SENT = 'sent';
-    case RECEIVED = ' received';
+    case RECEIVED = 'received';
 }

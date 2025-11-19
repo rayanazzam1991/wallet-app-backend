@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class Transactions extends Model
 {
@@ -31,5 +33,20 @@ class Transactions extends Model
     public function receiver(): BelongsTo
     {
         return $this->belongsTo(related: User::class, foreignKey: 'receiver_id', ownerKey: 'id');
+    }
+
+    public function transactionType(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (Auth::id() === $this->sender_id) {
+                    return 'Sent';
+                } elseif (Auth::id() === $this->receiver_id) {
+                    return 'Received';
+                }
+
+                return '';
+            }
+        );
     }
 }

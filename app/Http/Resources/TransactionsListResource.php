@@ -19,8 +19,9 @@ class TransactionsListResource extends JsonResource
             'id' => $this->id,
             'sender' => UserDetailsResource::make($this->sender),
             'receiver' => UserDetailsResource::make($this->receiver),
+            'type' => $this->transactionType,
             'amount' => $this->amount,
-            'created_at' => Carbon::parse($this->created_at)->toDateTimeString()
+            'created_at' => Carbon::parse($this->created_at)->toDateTimeString(),
         ];
     }
 }
