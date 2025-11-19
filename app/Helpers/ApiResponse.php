@@ -17,8 +17,7 @@ class ApiResponse
 
         $response = [
             'success' => $isOk ?? true,
-            'error_code' => $code ?? 200,
-            'message' => $message ?? '',
+            'message' => $message ?? 'Success',
             'data' => $data ?? null,
             'pagination' => $pagination ?? null,
         ];
