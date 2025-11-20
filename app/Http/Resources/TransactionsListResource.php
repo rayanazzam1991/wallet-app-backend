@@ -20,7 +20,8 @@ class TransactionsListResource extends JsonResource
             'sender' => UserDetailsResource::make($this->sender),
             'receiver' => UserDetailsResource::make($this->receiver),
             'type' => $this->transactionType,
-            'amount' => $this->amount,
+            'amount' => $this->total_amount,
+            'fees' => $this->commission_fees,
             'created_at' => Carbon::parse($this->created_at)->toDateTimeString(),
         ];
     }
