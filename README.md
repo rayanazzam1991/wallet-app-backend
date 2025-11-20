@@ -18,7 +18,6 @@ This repository contains the Laravel backend for the Wallet App. It is container
 ## Install dependencies
 ```bash
 composer install
-npm install
 ```
 
 ## Running with Laravel Sail (Docker)
