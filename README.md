@@ -13,7 +13,7 @@ This repository contains the Laravel backend for the Wallet App. It is container
    cp .env.example .env
    ```
 2. Set `APP_KEY` (run `php artisan key:generate` after dependencies are installed) and update database credentials. The Sail compose file maps MySQL and Redis ports from the container to your host, so the defaults in `.env.example` align with the Docker services (`DB_HOST=127.0.0.1`, `DB_PORT=3306`, `REDIS_HOST=127.0.0.1`, `REDIS_PORT=6379`).
-3. If you use GitHub Codespaces/SAIL `.environment` files for secrets, mirror the same keys found in `.env.example` (e.g., `APP_KEY`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `MAIL_*`) into your `.environment` so Sail can populate them on startup.
+3. If you use GitHub Codespaces/SAIL `.environment` files for secrets, mirror the same keys found in `.env.example` (e.g., `APP_KEY`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) into your `.environment` so Sail can populate them on startup.
 
 ## Install dependencies
 ```bash
@@ -56,7 +56,6 @@ Run the PHP test suite inside Sail:
 Key settings from `.env.example` you may want to adjust:
 - `APP_URL`: URL you use to access the app.
 - `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`: database name and credentials for the MySQL container.
-- `MAIL_*`: SMTP or mailtrap configuration.
 - `SESSION_DRIVER`, `CACHE_STORE`, `QUEUE_CONNECTION`: storage drivers used by Laravel.
 
 For additional variables, review `.env.example`.
