@@ -20,7 +20,8 @@ This repository contains the Laravel backend for the Wallet App. It is container
 composer install
 ```
 
-## Running with Laravel Sail (Docker)
+## Running with Docker
+### Option 1: Laravel Sail
 The repository includes a Sail definition (`compose.yaml`) that builds a PHP 8.4 application container and runs MySQL and Redis.
 
 1. Start the containers:
@@ -43,6 +44,32 @@ The repository includes a Sail definition (`compose.yaml`) that builds a PHP 8.4
 5. Stop containers when finished:
    ```bash
    ./vendor/bin/sail down
+   ```
+
+### Option 2: Standard Docker Compose
+If you prefer to run Docker directly without Sail or a local Composer install, you can use the provided Compose file:
+
+1. Build and start the containers:
+   ```bash
+   docker compose build
+   docker compose up -d
+   ```
+2. Install dependencies inside the running app container:
+   ```bash
+   docker compose exec app composer install
+   ```
+3. Generate the application key and run migrations/seeders:
+   ```bash
+   docker compose exec app php artisan key:generate
+   docker compose exec app php artisan migrate --seed
+   ```
+4. Tail logs:
+   ```bash
+   docker compose logs -f
+   ```
+5. Stop containers when finished:
+   ```bash
+   docker compose down
    ```
 
 ## Testing
