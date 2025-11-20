@@ -53,7 +53,14 @@ class Transactions extends Model
     public function totalAmount()  :Attribute
     {
         return Attribute::make(
-            get: fn()=> $this->amount + $this->commission_fees
+            get: function(){
+                if (Auth::id() === $this->sender_id) {
+                    return $this->amount + $this->commission_fees;
+                } elseif (Auth::id() === $this->receiver_id) {
+                    return $this->amount;
+                }
+                return $this->amount;
+            }
         );
     }
 }
