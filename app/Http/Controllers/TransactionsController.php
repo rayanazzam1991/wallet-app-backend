@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TransactionStatus;
 use App\Helpers\ApiResponse;
 use App\Helpers\PaginationResource;
 use App\Http\Requests\GetTransactionsListRequest;
@@ -13,6 +14,7 @@ use App\DTO\CreateTransactionDTO;
 use App\Http\Resources\TransactionsListResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class TransactionsController extends Controller
 {
@@ -39,7 +41,11 @@ class TransactionsController extends Controller
 
     public function create(TransferMoneyRequest $request): JsonResponse
     {
+
+        $requestId = (string) Str::uuid();
+
         $dto = new CreateTransactionDTO(
+            tempUUID: $requestId,
             senderId: Auth::id(),
             receiverId: $request->validated('receiver_id'),
             amount: (float) $request->validated('amount')
@@ -47,8 +53,17 @@ class TransactionsController extends Controller
 
         $this->transactionService->createTransaction($dto);
 
-        return response()->json([
-            'message' => 'Transfer created Successfully!',
-        ], 201);
+        return ApiResponse::sendResponse(
+            [
+                'message' => 'Transfer started',
+                'request_id' => $requestId,
+                'status' => TransactionStatus::PENDING->value,
+            ],code: 201
+        );
+//        return response()->json([
+//            'message' => 'Transfer started',
+//            'request_id' => $requestId,
+//            'status' => TransactionStatus::PENDING->value,
+//        ], 201);
     }
 }

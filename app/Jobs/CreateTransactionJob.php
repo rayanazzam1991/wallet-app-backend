@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\TransactionStatus;
 use App\Events\TransferMoneySuccess;
 use App\Models\Transactions;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,6 +19,7 @@ class CreateTransactionJob implements ShouldQueue
     public int $timeout = 30;
 
     public function __construct(
+        public string $temp_UUID,
         public int $sender_id,
         public int $receiver_id,
         public float $amount
@@ -81,12 +83,13 @@ class CreateTransactionJob implements ShouldQueue
                 'receiver_id'     => $receiverId,
                 'amount'          => $amount,
                 'commission_fees' => $commissionFees,
+                'status'          => TransactionStatus::SUCCESS->value
             ]);
 
             /**
              * STEP 5: Fire event
              */
-            event(new TransferMoneySuccess($transaction));
+            event(new TransferMoneySuccess(transaction: $transaction,requestId: $this->temp_UUID,));
 
         }, 5); // DB transaction retry count on deadlocks
     }

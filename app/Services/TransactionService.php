@@ -24,6 +24,7 @@ readonly class TransactionService
     {
         // dispatch async job
         CreateTransactionJob::dispatch(
+            $dto->tempUUID,
             $dto->senderId,
             $dto->receiverId,
             $dto->amount

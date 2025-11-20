@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Enums\TransactionStatus;
 use App\Models\Transactions;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -18,7 +19,7 @@ class TransferMoneySuccess implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(public Transactions $transaction)
+    public function __construct(public Transactions $transaction,public string $requestId)
     {
         //
     }
@@ -39,7 +40,9 @@ class TransferMoneySuccess implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
+            'request_id'  => $this->requestId,
             'transaction' => $this->transaction->toArray(),
+            'status'      => TransactionStatus::SUCCESS->value,
         ];
     }
 

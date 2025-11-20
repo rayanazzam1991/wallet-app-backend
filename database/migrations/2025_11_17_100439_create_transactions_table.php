@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TransactionStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -25,6 +26,8 @@ return new class extends Migration
             // Amount and commission
             $table->decimal('amount', 15, 2);
             $table->decimal('commission_fees', 15, 2)->default(0);
+
+            $table->string('status')->default(TransactionStatus::PENDING->value);
 
             $table->timestamps();
         });
