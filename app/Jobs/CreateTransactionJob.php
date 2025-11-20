@@ -32,8 +32,8 @@ class CreateTransactionJob implements ShouldQueue
             $amount     = $this->amount;
 
             $commissionRate = 1.5;
-            $amountWithoutFees = (100 * $amount) / (100 + $commissionRate);
-            $commissionFees = $amount - $amountWithoutFees;
+            $amountWithFees = $amount + ($amount * $commissionRate)/100;
+            $commissionFees = $amountWithFees - $amount;
 
             /**
              * STEP 1: Lock users in deterministic order (prevents DEADLOCKS)
@@ -51,7 +51,7 @@ class CreateTransactionJob implements ShouldQueue
             $receiver = $users[$receiverId];
 
             /**
-             * STEP 2: Check sender has enough balance
+             * STEP 2: Double Check sender has enough balance ( we did this in validation layer)
              */
             if ($sender->balance < $amount) {
                 throw new RuntimeException("Insufficient balance.");
@@ -64,13 +64,13 @@ class CreateTransactionJob implements ShouldQueue
             DB::table('users')
                 ->where('id', $senderId)
                 ->update([
-                    'balance' => DB::raw("balance - {$amount}")
+                    'balance' => DB::raw("balance - {$amountWithFees}")
                 ]);
 
             DB::table('users')
                 ->where('id', $receiverId)
                 ->update([
-                    'balance' => DB::raw("balance + {$amountWithoutFees}")
+                    'balance' => DB::raw("balance + {$amount}")
                 ]);
 
             /**

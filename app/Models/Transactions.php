@@ -49,4 +49,11 @@ class Transactions extends Model
             }
         );
     }
+
+    public function totalAmount()  :Attribute
+    {
+        return Attribute::make(
+            get: fn()=> $this->amount + $this->commission_fees
+        );
+    }
 }
